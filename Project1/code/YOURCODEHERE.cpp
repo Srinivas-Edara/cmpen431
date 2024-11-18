@@ -63,51 +63,57 @@ std::string generateCacheLatencyParams(string halfBackedConfig) {
  * Returns 1 if configuration is valid, else 0
  */
 int validateConfiguration(std::string configuration) {
-
 	// FIXME - YOUR CODE HERE
 
 	// The below is a necessary, but insufficient condition for validating a
 	// configuration.
-	if isNumDimConfiguration(configuration){
+	if (isNumDimConfiguration(configuration)){
 		//taken from project files, iterates through config values
+		int l1block, dl1sets, dl1assoc, il1sets, il1assoc, ul2assoc, ul2sets, ul2block, width;
 		for (int fieldnum = 0; fieldnum < NUM_DIMS; ++fieldnum) {
 			int j = 2 * fieldnum;
 			std::string field = configuration.substr(j, 1);
 			int fieldvalue = atoi(field.c_str());
 			//stores width since needed later
 			if (fieldnum == 0){
-				int width = fieldvalue;
+				width = fieldvalue;
 			}
 			else if (fieldnum == 2){
 				if (width>fieldvalue){
-					return 0
+					return 0;
 				}
-				int l1block = fieldvalue;
+				l1block = (fieldvalue+1)*8;
 			}
 			else if (fieldnum == 3){
-				int dl1sets = fieldvalue;
+				dl1sets = 32*pow(2,fieldvalue);
 			}
 			else if (fieldnum == 4){
-				int dl1assoc = fieldvalue;
+				dl1assoc = pow(2,fieldvalue);
 			}
 			else if (fieldnum == 5){
-				int il1sets = fieldvalue;
+				il1sets = 32*pow(2,fieldvalue);
 			}
 			else if (fieldnum == 6){
-				int il1assoc = fieldvalue;
+				il1assoc =  pow(2,fieldvalue);
 			}
 			else if (fieldnum == 7){
-				int ul2sets = fieldvalue;
+				ul2sets = 256*pow(2,fieldvalue);
 			}
 			else if(fieldnum == 8){
-				int ul2block = fieldvalue;
+				ul2block = 16*pow(2,fieldvalue);
+				if (ul2block < 2*l1block){
+					return 0;
+				}
 			}
 			else if(fieldnum == 9){
-				int ul2assoc = fieldvalue;
+				ul2assoc = fieldvalue;
 				int il1size = l1block*il1sets*il1assoc;
 				int dl1size = l1block*dl1sets*dl1assoc;
 				int ul2size = ul2sets*ul2block*ul2assoc;
-				if(2048 > il1size || 
+			    if(ul2size < 2 *(dl1size+il1size) || il1size < 2048 || il1size > 65536 ||
+				dl1size < 2048 || dl1size > 65536 || ul2size < 32768 || ul2size > 1024000){
+					return 0;
+				}
 			}
 
 		}
