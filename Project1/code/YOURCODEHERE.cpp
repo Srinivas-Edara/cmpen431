@@ -48,10 +48,50 @@ std::string generateCacheLatencyParams(string halfBackedConfig) {
 	//
 	//YOUR CODE BEGINS HERE
 	//
+	
+	int l1block, dl1sets, dl1assoc, il1sets, il1assoc, ul2assoc, ul2sets, ul2block, il1sizeKB, dl1sizeKB, ul2sizeKB;
+	//determines values of fields needed to calculate latency
+	for (int fieldnum = 2; fieldnum < 10; ++fieldnum) {
+			int j = 2 * fieldnum;
+			std::string field = halfBackedConfig.substr(j, 1);
+			int fieldvalue = atoi(field.c_str());
+			if (fieldnum == 2){
+				l1block = (fieldvalue+1)*8;
+			}
+			else if (fieldnum == 3){
+				dl1sets = 32*pow(2,fieldvalue);
+			}
+			else if (fieldnum == 4){
+				dl1assoc = pow(2,fieldvalue);
+			}
+			else if (fieldnum == 5){
+				il1sets = 32*pow(2,fieldvalue);
+			}
+			else if (fieldnum == 6){
+				il1assoc = pow(2,fieldvalue);
+			}
+			else if (fieldnum == 7){
+				ul2sets = 256*pow(2,fieldvalue);
+			}
+			else if(fieldnum == 8){
+				ul2block = 16*pow(2,fieldvalue);
+			}
+			else if(fieldnum == 9){
+				ul2assoc = pow(2,fieldvalue);
+				il1sizeKB = l1block*il1sets*il1assoc/1024;
+				dl1sizeKB = l1block*dl1sets*dl1assoc/1024;
+				ul2sizeKB = ul2sets*ul2block*ul2assoc/1024; 
+			}
+	
+	}
 
-	// This is a dumb implementation.
-	latencySettings = "1 1 1";
-
+	int il1lat = log2(il1sizeKB) + log2(il1assoc) - 1;
+	int dl1lat = log2(dl1sizeKB) + log2(dl1assoc) - 1;
+	int ul2lat = log2(ul2sizeKB) + log2(ul2assoc) - 5;
+	std::stringstream ss;
+    ss << dl1lat << " " << il1lat << " " << ul2lat;
+	latencySettings = ss.str();
+ 
 	//
 	//YOUR CODE ENDS HERE
 	//
@@ -68,9 +108,9 @@ int validateConfiguration(std::string configuration) {
 	// The below is a necessary, but insufficient condition for validating a
 	// configuration.
 	if (isNumDimConfiguration(configuration)){
-		//taken from project files, iterates through config values
 		int l1block, dl1sets, dl1assoc, il1sets, il1assoc, ul2assoc, ul2sets, ul2block, width;
-		for (int fieldnum = 0; fieldnum < NUM_DIMS; ++fieldnum) {
+		//taken from project files, iterates through config values that need to be validated
+		for (int fieldnum = 0; fieldnum < 10; ++fieldnum) {
 			int j = 2 * fieldnum;
 			std::string field = configuration.substr(j, 1);
 			int fieldvalue = atoi(field.c_str());
@@ -94,28 +134,34 @@ int validateConfiguration(std::string configuration) {
 				il1sets = 32*pow(2,fieldvalue);
 			}
 			else if (fieldnum == 6){
-				il1assoc =  pow(2,fieldvalue);
+				il1assoc = pow(2,fieldvalue);
 			}
 			else if (fieldnum == 7){
 				ul2sets = 256*pow(2,fieldvalue);
 			}
 			else if(fieldnum == 8){
 				ul2block = 16*pow(2,fieldvalue);
+				//ul2 blocksize must be atleast double l1blocksize;
 				if (ul2block < 2*l1block){
 					return 0;
 				}
 			}
 			else if(fieldnum == 9){
-				ul2assoc = fieldvalue;
+				ul2assoc = pow(2,fieldvalue);
+				//all values have been converted to bits
 				int il1size = l1block*il1sets*il1assoc;
 				int dl1size = l1block*dl1sets*dl1assoc;
 				int ul2size = ul2sets*ul2block*ul2assoc;
+				//size contstraints check;
 			    if(ul2size < 2 *(dl1size+il1size) || il1size < 2048 || il1size > 65536 ||
 				dl1size < 2048 || dl1size > 65536 || ul2size < 32768 || ul2size > 1024000){
 					return 0;
 				}
+				else{
+					return 1;
+				}
 			}
-
+			
 		}
 	}
 	return 0;
