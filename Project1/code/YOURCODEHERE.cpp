@@ -56,7 +56,7 @@ std::string generateCacheLatencyParams(string halfBackedConfig) {
 			std::string field = halfBackedConfig.substr(j, 1);
 			int fieldvalue = atoi(field.c_str());
 			if (fieldnum == 2){
-				l1block = (fieldvalue+1)*8;
+				l1block = pow(2,fieldvalue)*8;
 			}
 			else if (fieldnum == 3){
 				dl1sets = 32*pow(2,fieldvalue);
@@ -103,7 +103,6 @@ std::string generateCacheLatencyParams(string halfBackedConfig) {
  * Returns 1 if configuration is valid, else 0
  */
 int validateConfiguration(std::string configuration) {
-	// FIXME - YOUR CODE HERE
 
 	// The below is a necessary, but insufficient condition for validating a
 	// configuration.
@@ -122,7 +121,7 @@ int validateConfiguration(std::string configuration) {
 				if (width>fieldvalue){
 					return 0;
 				}
-				l1block = (fieldvalue+1)*8;
+				l1block = pow(2,fieldvalue)*8;
 			}
 			else if (fieldnum == 3){
 				dl1sets = 32*pow(2,fieldvalue);
