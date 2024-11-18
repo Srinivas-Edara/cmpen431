@@ -20,7 +20,9 @@ using namespace std;
 /*
  * Enter your PSU IDs here to select the appropriate scanning order.
  */
-#define PSU_ID_SUM (912345679+911111111)
+
+ //modulo 15: 15 has Core Cache FPU BP order
+#define PSU_ID_SUM (921604930 + 971725829)
 
 /*
  * Some global variables to track heuristic progress.
@@ -66,7 +68,51 @@ int validateConfiguration(std::string configuration) {
 
 	// The below is a necessary, but insufficient condition for validating a
 	// configuration.
-	return isNumDimConfiguration(configuration);
+	if isNumDimConfiguration(configuration){
+		//taken from project files, iterates through config values
+		for (int fieldnum = 0; fieldnum < NUM_DIMS; ++fieldnum) {
+			int j = 2 * fieldnum;
+			std::string field = configuration.substr(j, 1);
+			int fieldvalue = atoi(field.c_str());
+			//stores width since needed later
+			if (fieldnum == 0){
+				int width = fieldvalue;
+			}
+			else if (fieldnum == 2){
+				if (width>fieldvalue){
+					return 0
+				}
+				int l1block = fieldvalue;
+			}
+			else if (fieldnum == 3){
+				int dl1sets = fieldvalue;
+			}
+			else if (fieldnum == 4){
+				int dl1assoc = fieldvalue;
+			}
+			else if (fieldnum == 5){
+				int il1sets = fieldvalue;
+			}
+			else if (fieldnum == 6){
+				int il1assoc = fieldvalue;
+			}
+			else if (fieldnum == 7){
+				int ul2sets = fieldvalue;
+			}
+			else if(fieldnum == 8){
+				int ul2block = fieldvalue;
+			}
+			else if(fieldnum == 9){
+				int ul2assoc = fieldvalue;
+				int il1size = l1block*il1sets*il1assoc;
+				int dl1size = l1block*dl1sets*dl1assoc;
+				int ul2size = ul2sets*ul2block*ul2assoc;
+				if(2048 > il1size || 
+			}
+
+		}
+	}
+	return 0;
 }
 
 /*
@@ -133,7 +179,7 @@ std::string generateNextConfigurationProposal(std::string currentconfiguration,
 		// Fill in remaining independent params with 0.
 		for (int dim = (currentlyExploringDim + 1);
 				dim < (NUM_DIMS - NUM_DIMS_DEPENDENT); ++dim) {
-			ss << "0 ";
+			ss << "0 "; //NEEDS TO FILL WITH BASELINE CONFIG
 		}
 
 		//
