@@ -33,6 +33,7 @@ using namespace std;
 unsigned int currentlyExploringDim = 0;
 bool currentDimDone = false;
 bool isDSEComplete = false;
+int configIterationCounter = 0;
 
 /*
  * Given a half-baked configuration containing cache properties, generate
@@ -219,10 +220,16 @@ std::string generateNextConfigurationProposal(std::string currentconfiguration,
 		// implementation.
 		int nextValue = extractConfigPararm(nextconfiguration,
 				currentlyExploringDim) + 1;
+		configIterationCounter+=1;
 
-		if (nextValue >= GLOB_dimensioncardinality[currentlyExploringDim]) {
+		if (/*nextValue >= GLOB_dimensioncardinality[currentlyExploringDim]*/configIterationCounter >= GLOB_dimensioncardinality[currentlyExploringDim]) {
 			nextValue = GLOB_dimensioncardinality[currentlyExploringDim] - 1;
+			configIterationCounter = 0;
 			currentDimDone = true;
+		}
+
+		else if(nextValue >= GLOB_dimensioncardinality[currentlyExploringDim]){
+			nextValue = 0;
 		}
 
 		ss << nextValue << " ";
