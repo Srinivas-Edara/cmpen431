@@ -120,6 +120,7 @@ int validateConfiguration(std::string configuration) {
 			}
 			else if (fieldnum == 2){
 				if (width>fieldvalue){
+					std::cerr << "Width exceeds blocksize\n";
 					return 0;
 				}
 				l1block = pow(2,fieldvalue)*8;
@@ -143,18 +144,20 @@ int validateConfiguration(std::string configuration) {
 				ul2block = 16*pow(2,fieldvalue);
 				//ul2 blocksize must be atleast double l1blocksize;
 				if (ul2block < 2*l1block){
+					std::cerr << "unified cache block size must be atleast double l1 block size\n";
 					return 0;
 				}
 			}
 			else if(fieldnum == 9){
 				ul2assoc = pow(2,fieldvalue);
-				//all values have been converted to bits
+				//all values have been converted to bytes
 				int il1size = l1block*il1sets*il1assoc;
 				int dl1size = l1block*dl1sets*dl1assoc;
 				int ul2size = ul2sets*ul2block*ul2assoc;
 				//size contstraints check;
 			    if(ul2size < 2 *(dl1size+il1size) || il1size < 2048 || il1size > 65536 ||
 				dl1size < 2048 || dl1size > 65536 || ul2size < 32768 || ul2size > 1024000){
+					std::cerr << "cache size requirements not met\n";
 					return 0;
 				}
 				else{
@@ -237,7 +240,9 @@ std::string generateNextConfigurationProposal(std::string currentconfiguration,
 		// Fill in remaining independent params with 0.
 		for (int dim = (currentlyExploringDim + 1);
 				dim < (NUM_DIMS - NUM_DIMS_DEPENDENT); ++dim) {
-			ss << "0 "; //NEEDS TO FILL WITH BASELINE CONFIG
+			if (dim < GLOB_baseline.size()){
+				ss << GLOB_baseline[dim*2] << " ";
+			}
 		}
 
 		//
